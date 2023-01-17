@@ -21,7 +21,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   UserAddressesClass currAddress;
   double subtotal = CartManager.subtotal;
   double deliveryFees = CartManager.deliveryFees;
-
+//promo
   final promoCodeController = TextEditingController();
   bool isPromoApplied = false;
 
