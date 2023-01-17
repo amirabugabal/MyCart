@@ -6,7 +6,7 @@ import 'package:mycart/services/data_manager.dart';
 import 'package:mycart/widgets/cart/payment_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+//checkout
 class CheckoutScreen extends StatefulWidget {
   static const appBarTitle = 'Checkout';
   static const routeName = '/checkout';
