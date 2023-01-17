@@ -44,8 +44,3 @@ class CartItemClass {
         'item_price': mItem.getFinalPrice(),
       };
 }
-//
-//
-//
-//
-//
