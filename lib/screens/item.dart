@@ -25,7 +25,7 @@ class ItemScreen extends StatefulWidget {
 
 class ItemScreenState extends State<ItemScreen> {
   int iniValue = 0;
-
+//adem item
   void addItem() {
     setState(() {
       iniValue++;
