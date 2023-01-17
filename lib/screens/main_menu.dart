@@ -17,7 +17,7 @@ class MainMenuScreen extends StatefulWidget {
 
 class MainMenuScreenState extends State<MainMenuScreen> {
   UserAddressesClass currAddress;
-
+//admin
   @override
   void initState() {
     if (DataManager.mPrefManager.getType() == "admin") {
