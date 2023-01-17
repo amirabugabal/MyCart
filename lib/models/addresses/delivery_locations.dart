@@ -5,5 +5,5 @@ class DeliveryLocationsClass {
   int deliveryTime;
 
   DeliveryLocationsClass(
-      this.id, this.name, this.deliveryFees, this.deliveryTime);
+     this.id, this.name, this.deliveryFees, this.deliveryTime);
 }
