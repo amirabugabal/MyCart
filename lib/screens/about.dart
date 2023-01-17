@@ -53,6 +53,7 @@ class _AboutState extends State<AboutUs> {
     automaticallyImplyLeading: false,
     leadingWidth: 65,
     title: Text(
+      // about us
     'About Us',
     style: TextStyle(fontWeight: FontWeight.bold),
     ),
