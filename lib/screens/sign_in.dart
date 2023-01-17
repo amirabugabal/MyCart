@@ -1,8 +1,7 @@
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mycart/screens/drawer_screen.dart';
 import 'package:mycart/screens/sign_up.dart';
+import 'package:mycart/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:mycart/services/data_manager.dart';
+import 'package:mycart/services/auth.dart';
 
 import 'sign_up.dart';
 
@@ -18,15 +17,10 @@ class SignInScreen extends StatefulWidget {
 class SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email, _password;
+  final _auth = Auth();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -54,8 +48,8 @@ class SignInScreenState extends State<SignInScreen> {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                            Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -160,32 +154,17 @@ class SignInScreenState extends State<SignInScreen> {
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 15),
-                    child:  RaisedButton(
+                    child: Builder(
+                        builder: (context) => RaisedButton(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0)),
                               padding: const EdgeInsets.all(0.0),
-                              onPressed: () {
-                                if (_formKey.currentState.validate()) {
-                                  for(int i = 0 ; i < DataManager.users.length ; i++){
-                                    if(DataManager.users[i][2] == emailController.text && DataManager.users[i][3] == passwordController.text){
-                                      DataManager.userName = DataManager.users[i][1];
-                                      DataManager.isLoggedIn = true;
-                                      print("LOGGED IN");
-                                    }
-                                  }
-                                  if(DataManager.isLoggedIn){
-                                    Navigator.of(context).pushReplacementNamed(DrawerScreen.routeName);
-                                  }else{
-                                    Fluttertoast.showToast(msg: 'Invalid email or password');
-                                  }
-                                }
-                              },
                               child: Ink(
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: <Color>[
-                                      Color(0xFF89CFF0),
-                                      Color(0xFF0047AB),
+                                      Color(0xFF00d466),
+                                      Color(0xFF00af87),
                                     ],
                                   ),
                                   borderRadius:
@@ -205,8 +184,122 @@ class SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
-                            ),
+                              onPressed: () async {
+                                if (_formKey.currentState.validate()) {
+                                  _formKey.currentState.save();
+                                  try {
+                                    await _auth.signIn(_email, _password);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      SplashScreen.routeName,
+                                    );
+                                  } catch (e) {
+                                    Scaffold.of(context).showSnackBar(
+                                        SnackBar(content: Text(e.message)));
+                                  }
+                                }
+                              },
+                            )),
                   ),
+                  /*new Container( ////////////////////////////// REMOVED TILL ACCEPTANCE ON GOOGLE PLAY
+                    padding: const EdgeInsets.only(top: 21.0, bottom: 5.0),
+                    alignment: Alignment.center,
+                    child: new GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, ForgotPasswordScreen.routeName);
+                      },
+                      child: new Text(
+                        "Forgot password?",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                  Row(children: <Widget>[
+                    Expanded(
+                      child: new Container(
+                        margin: const EdgeInsets.only(left: 5.0, right: 15.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          height: 36,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      "or",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    Expanded(
+                      child: new Container(
+                        margin: const EdgeInsets.only(left: 15.0, right: 5.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          height: 36,
+                        ),
+                      ),
+                    ),
+                  ]),
+                  new Text(
+                    "You can sign in with",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: RaisedButton(
+                          color: Colors.grey[100],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          padding: const EdgeInsets.all(0.0),
+                          child: Container(
+                            constraints: const BoxConstraints(minWidth: 88.0),
+                            height: 55,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: EdgeInsets.all(0),
+                              child: Image.asset(
+                                "assets/images/social/google_logo.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            print("G");
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      Expanded(
+                        child: RaisedButton(
+                          color: Colors.grey[100],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          padding: const EdgeInsets.all(0.0),
+                          child: Container(
+                            constraints: const BoxConstraints(minWidth: 88.0),
+                            height: 55,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: EdgeInsets.all(17),
+                              child: Image.asset(
+                                "assets/images/social/facebook_logo.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            print("FB");
+                          },
+                        ),
+                      ),
+                    ],
+                  ),*/
                   SizedBox(
                     height: 5,
                   ),
@@ -214,10 +307,10 @@ class SignInScreenState extends State<SignInScreen> {
                     color: Colors.grey,
                     height: 35,
                   ),
-                   Container(
+                  new Container(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     alignment: Alignment.center,
-                    child:  GestureDetector(
+                    child: new GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, SignUpScreen.routeName);
                       },
@@ -230,7 +323,7 @@ class SignInScreenState extends State<SignInScreen> {
                           new Text(
                             "Sign Up",
                             style: TextStyle(
-                                color: Color(0xFF89CFF0),
+                                color: Color(0xFF00af87),
                                 fontWeight: FontWeight.bold),
                           ),
                         ],

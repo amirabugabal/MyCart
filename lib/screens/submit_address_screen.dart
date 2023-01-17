@@ -1,8 +1,13 @@
-
+import 'package:mycart/models/addresses/delivery_locations.dart';
+import 'package:mycart/models/addresses/user_addresses.dart';
+import 'package:mycart/services/data_manager.dart';
 import 'package:flutter/material.dart';
 
 class SubmitAddressScreen extends StatefulWidget {
-  static const routeName = '/submit-address';
+  Function callBackFunction;
+  UserAddressesClass cUserAddress;
+
+  SubmitAddressScreen(this.callBackFunction, [this.cUserAddress]);
 
   @override
   SubmitAddressScreenState createState() {
@@ -11,6 +16,7 @@ class SubmitAddressScreen extends StatefulWidget {
 }
 
 class SubmitAddressScreenState extends State<SubmitAddressScreen> {
+  DeliveryLocationsClass currLocation = DataManager.deliveryLocations[0];
   final _formKey = GlobalKey<FormState>();
   final streetNameController = TextEditingController();
   final buildingNumberController = TextEditingController();
@@ -27,7 +33,28 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
     phoneNumberController.dispose();
     super.dispose();
   }
-    
+
+  void locationChanged(DeliveryLocationsClass newLocation) {
+    setState(() {
+      currLocation = newLocation;
+    });
+  }
+
+  @override
+  void initState() {
+    if (widget.cUserAddress != null) {
+      print('existing add.');
+      currLocation = widget.cUserAddress.locationData;
+      streetNameController.text = widget.cUserAddress.streetName;
+      buildingNumberController.text = widget.cUserAddress.buildingNumber;
+      floorNumberController.text = widget.cUserAddress.floorNumber.toString();
+      apartmentNumberController.text =
+          widget.cUserAddress.apartmentNumber.toString();
+      phoneNumberController.text = widget.cUserAddress.phoneNumber.toString();
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +67,8 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -54,7 +81,7 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
           automaticallyImplyLeading: false,
           leadingWidth: 65,
           title: Text(
-            'Add Address',
+            widget.cUserAddress == null ? 'Add Address' : 'Update Address',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           leading: Padding(
@@ -80,6 +107,41 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        color: MediaQuery.of(context).platformBrightness ==
+                                Brightness.dark
+                            ? Color(0xFF444444)
+                            : Color(0xFFf0f0f0),
+                      ),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                            buttonTheme: ButtonTheme.of(context).copyWith(
+                          alignedDropdown: true,
+                        )),
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<DeliveryLocationsClass>(
+                              onChanged: locationChanged,
+                              value: currLocation,
+                              items: DataManager.deliveryLocations.map((value) {
+                                return DropdownMenuItem<DeliveryLocationsClass>(
+                                  value: value,
+                                  child: Text(
+                                    value.name,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: EdgeInsets.only(top: 15),
                       child: TextFormField(
@@ -224,8 +286,8 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: <Color>[
-                                  Color(0xFF89CFF0),
-                                  Color(0xFF0047AB),
+                                  Color(0xFF00d466),
+                                  Color(0xFF00af87),
                                 ],
                               ),
                               borderRadius:
@@ -236,7 +298,9 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
                                   minWidth: 88.0, minHeight: 55),
                               alignment: Alignment.center,
                               child: Text(
-                                'Add Address',
+                                widget.cUserAddress == null
+                                    ? 'Add Address'
+                                    : 'Update Address',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -246,7 +310,33 @@ class SubmitAddressScreenState extends State<SubmitAddressScreen> {
                             ),
                           ),
                           onPressed: () {
-                            if (_formKey.currentState.validate()) {}
+                            if (_formKey.currentState.validate()) {
+                              var locationId = currLocation.id;
+                              var streetName = streetNameController.text;
+                              var buildingNumber =
+                                  buildingNumberController.text;
+                              var floorNumber = floorNumberController.text;
+                              var apartmentNumber =
+                                  apartmentNumberController.text;
+                              var phoneNumber = phoneNumberController.text;
+                              DataManager.submitAddress(
+                                locationId,
+                                streetName,
+                                buildingNumber,
+                                floorNumber,
+                                apartmentNumber,
+                                phoneNumber,
+                                widget.cUserAddress != null
+                                    ? widget.cUserAddress.id
+                                    : "",
+                              ).then((response) {
+                                if (response) {
+                                  Navigator.pop(context);
+                                  DataManager.iniUserAddresses(
+                                      widget.callBackFunction);
+                                }
+                              });
+                            }
                           }),
                     ),
                   ],

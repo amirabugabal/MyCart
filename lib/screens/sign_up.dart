@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
+import 'package:mycart/screens/sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:mycart/services/auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const routeName = '/sign-up';
@@ -12,6 +14,7 @@ class SignUpScreen extends StatefulWidget {
 
 class SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _auth = Auth();
   String _name, _phone, _email, _password;
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
@@ -44,8 +47,8 @@ class SignUpScreenState extends State<SignUpScreen> {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -266,8 +269,8 @@ class SignUpScreenState extends State<SignUpScreen> {
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: <Color>[
-                                    Color(0xFF89CFF0),
-                            Color(0xFF0047AB),
+                                    Color(0xFF00d466),
+                                    Color(0xFF00af87),
                                   ],
                                 ),
                                 borderRadius:
@@ -287,8 +290,23 @@ class SignUpScreenState extends State<SignUpScreen> {
                                 ),
                               ),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState.validate()) {}
+                            onPressed: () async {
+                              if (_formKey.currentState.validate()) {
+                                _formKey.currentState.save();
+                                try {
+                                  await _auth.signUp(
+                                      _name, _phone, _email, _password);
+
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                      content: Text(
+                                          "Sign up success, please login")));
+                                  Navigator.pushNamed(
+                                      context, SignInScreen.routeName);
+                                } catch (e) {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                      content: Text(e.message.toString())));
+                                }
+                              }
                             })),
                   ),
                   SizedBox(
@@ -315,7 +333,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                           new Text(
                             "Log In",
                             style: TextStyle(
-                                color: Color(0xFF89CFF0),
+                                color: Color(0xFF00af87),
                                 fontWeight: FontWeight.bold),
                           ),
                         ],

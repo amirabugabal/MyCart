@@ -1,3 +1,6 @@
+import 'package:mycart/models/addresses/user_addresses.dart';
+import 'package:mycart/services/cart_manager.dart';
+import 'package:mycart/services/data_manager.dart';
 import 'package:flutter/material.dart';
 
 class OrderPlacedScreen extends StatelessWidget {
@@ -15,8 +18,8 @@ class OrderPlacedScreen extends StatelessWidget {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -58,11 +61,27 @@ class OrderPlacedScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Thanks for your order',
-                            style: TextStyle(
-                              fontSize: 18,
-                            ), //Needs Simi-bold weight
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Thanks for your order ',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ), //Needs Simi-bold weight
+                              ),
+                              Text(
+                                DataManager.mPrefManager
+                                        .getName()
+                                        .split(" ")
+                                        .first +
+                                    '!',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                           Container(
                             padding: EdgeInsets.only(top: 8, bottom: 25),
@@ -70,8 +89,16 @@ class OrderPlacedScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Your order will be delivered in 40 min',
+                                  'Your order will be delivered in ',
                                   textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  CartManager.deliveryTime.toString() +
+                                      ' minutes',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color(0xFF00af87),
+                                  ),
                                 ),
                               ],
                             ),
@@ -90,8 +117,8 @@ class OrderPlacedScreen extends StatelessWidget {
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: <Color>[
-                        Color(0xFF89CFF0),
-                        Color(0xFF0047AB),
+                        Color(0xFF00d466),
+                        Color(0xFF00af87),
                       ],
                     ),
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),

@@ -44,8 +44,8 @@ Widget cartEmpty(BuildContext context) {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
               borderRadius: BorderRadius.all(Radius.circular(20.0)),

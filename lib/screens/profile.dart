@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:mycart/models/addresses/user_addresses.dart';
+import 'package:mycart/screens/settings.dart';
 import 'package:mycart/screens/submit_address_screen.dart';
 import 'package:mycart/services/data_manager.dart';
+import 'package:mycart/widgets/profile/user_addresses/user_addresses.dart';
+import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const appBarTitle = 'Profile';
@@ -13,7 +16,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class ProfileScreenState extends State<ProfileScreen> {
-  
+  void updateAddresses() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,15 +30,35 @@ class ProfileScreenState extends State<ProfileScreen> {
         leadingWidth: 80,
         elevation: 0,
         title: new GestureDetector(
-          onTap: () {},
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              ProfileScreen.routeName,
+            ); //Edit Profile Screen
+          },
           child: Text(
             'Edit Profile',
             style: TextStyle(
-              color: Color(0xFF89CFF0),
+              color: Color(0xFF00af87),
               fontSize: 14,
             ),
           ),
         ),
+        actions: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 3, right: 15, top: 5, bottom: 5),
+            child: IconButton(
+              icon: Icon(
+                Icons.settings_outlined,
+                size: 32,
+              ),
+              onPressed: () => Navigator.pushNamed(
+                context,
+                Settings.routeName,
+              ), // Settings Screen
+            ),
+          ),
+        ],
       ),
       body: ListView(
         children: [
@@ -62,7 +88,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                       Flexible(
                         fit: FlexFit.loose,
                         child: Text(
-                          DataManager.userName,
+                          DataManager.mPrefManager.getName(),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -75,6 +101,12 @@ class ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 15,
                 ),
+                Column(
+                  children: <Widget>[
+                    for (UserAddressesClass i in DataManager.userAddresses)
+                      UserAddressesWidget(context, i, updateAddresses),
+                  ],
+                ),
                 Padding(
                   padding: EdgeInsets.only(top: 5, left: 5, right: 3),
                   child: RaisedButton(
@@ -85,8 +117,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: <Color>[
-                            Color(0xFF89CFF0),
-                            Color(0xFF0047AB),
+                            Color(0xFF00d466),
+                            Color(0xFF00af87),
                           ],
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -106,7 +138,14 @@ class ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushNamed(SubmitAddressScreen.routeName);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return SubmitAddressScreen(updateAddresses);
+                          },
+                        ),
+                      );
                     },
                   ),
                 ),

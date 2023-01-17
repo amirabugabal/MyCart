@@ -1,24 +1,174 @@
+import 'package:mycart/models/cart/cart_item.dart';
+import 'package:mycart/screens/admin/submit_category.dart';
+import 'package:mycart/services/cart_manager.dart';
+import 'package:mycart/services/firebase_manager.dart';
+import 'dart:async';
+import 'package:mycart/services/perference_manager.dart';
+
 class DataManager {
+  static PrefManager mPrefManager = new PrefManager();
+  static List deliveryLocations = new List();
+  static List userAddresses = new List();
+  static String mainMenuBanner = "https://miumun.org/mobileimages/banner.png";
+  static List mainMenuCategories = new List();
+  static List mainMenuItems = new List();
+  static List subMenuItems = new List();
+  static List searchItems = new List();
+  static List lastSearchKeywords = new List();
+  static List recentOrders = new List();
+  static List offersItems = new List();
+  static bool isDarkMode = false;
 
-  static bool isLoggedIn = false;
-  static String userName = '';
+  static Future<void> iniUserAddresses([Function callBackFunction]) async {
+    DataManager.deliveryLocations =
+        await FirebaseManager.getDeliveryLocations();
+    DataManager.userAddresses = await FirebaseManager.getUserAddresses();
+    if (DataManager.mPrefManager.getSelectedAddress() == "") {
+      if (DataManager.deliveryLocations != null &&
+          DataManager.userAddresses != null &&
+          DataManager.userAddresses.length > 0) {
+        DataManager.mPrefManager
+            .setSelectedAddress(DataManager.userAddresses[0].id.toString());
+      } else {}
+    }
+    if (DataManager.userAddresses != null) {
+      DataManager.mPrefManager.updateDeliveryFeesAndTime();
+    }
+    if (callBackFunction != null) {
+      callBackFunction();
+    }
+  }
 
-  static  final List users = [
-                  [1, 'Hisham Hassan', 'hisham@gmail.com', '123456789'],
-                  [2, 'Ali Waleed', 'ali@gmail.com', '123456789'],
-                  [3, 'Amir Mohamed', 'amir@gmail.com', '123456789'],
-                  [4, 'Ahmed Tarek', 'ahmed@gmail.com', '123456789']
-  ];
+  static Future<void> iniMainMenuCategories() async {
+    DataManager.mainMenuCategories =
+        await FirebaseManager.getMainMenuCategories();
+  }
 
-  static final List products = [
-    [1, 'Electorincs', 'Samsung TV', 'https://images.samsung.com/is/image/samsung/eg-fhd-t5300-ua43t5300auxeg-frontblack-254763456?\$650_519_PNG\$', 10000 ],
-    [2, 'Electorincs', 'iPhone XS', 'https://mobizil.com/wp-content/uploads/2018/09/iphone-xs.jpg', 25000],
-    [3, 'Accessories', 'AirPods', 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000', 3000],
-    [4, 'Accessories', 'Headphones', 'https://m.media-amazon.com/images/I/71ozyM-GtML._AC_SY879_.jpg', 200],
-    [5, 'Clothes', 'Shoes' , 'https://cdn.shopify.com/s/files/1/0100/8431/9313/products/u-s-polo-assn-bentley-navy-shoes-jlood-com-188_512x512.jpg?v=1643497901', 500],
-    [6, 'Clothes', 'Tshirt', 'https://pyxis.nymag.com/v1/imgs/8f2/9c4/c95d85e1b7750cee91df7a7d5db3e355a9-13-black-tshirt-jcrew.2x.rsocial.w600.jpg', 600]
-  ];
+  static Future<void> iniMainMenuItems() async {
+    DataManager.mainMenuItems = await FirebaseManager.getMainMenuItems();
+  }
 
+  static Future<void> iniSubMenuItems(String id) async {
+    DataManager.subMenuItems = await FirebaseManager.getSubMenuItems(id);
+  }
 
+  static Future<void> iniSearchItems(String searchKey) async {
+    DataManager.searchItems = await FirebaseManager.getSearchItems(searchKey);
+  }
 
+  static Future<void> iniRecentOrders() async {
+    DataManager.recentOrders = await FirebaseManager.getRecentOrders();
+  }
+
+  static Future<bool> submitAddress(locationId, streetName, buildingNumber,
+      floorNumber, apartmentNumber, phoneNumber,
+      [String addressId = ""]) async {
+    return await FirebaseManager.submitAddress(locationId, streetName,
+        buildingNumber, floorNumber, apartmentNumber, phoneNumber, addressId);
+  }
+
+  static Future<bool> deleteAddress(addressId) async {
+    return await FirebaseManager.deleteAddress(addressId);
+  }
+
+  static Future<bool> placeOrder() async {
+    List<dynamic> myCartItems = new List();
+    for (CartItemClass x in CartManager.mCart) {
+      myCartItems.add(x.getAsMap());
+    }
+    Map<String, dynamic> myOrder = {
+      'sub_total': CartManager.subtotal,
+      'delivery_fees': CartManager.deliveryFees,
+      'promocode': CartManager.promocode,
+      'discount': CartManager.discount,
+      'order_note': CartManager.orderNote,
+      'total_price': CartManager.getTotalPrice(),
+      'delivery_address_id': DataManager.mPrefManager.getSelectedAddress(),
+      'status': 0,
+      'time': 0,
+      'user_id': DataManager.mPrefManager.id,
+      'items': myCartItems,
+    };
+    await FirebaseManager.placeOrder(myOrder);
+    await DataManager.iniRecentOrders();
+    CartManager.clean();
+    return true;
+  }
+
+  static Future<void> iniOffersItems() async {
+    DataManager.offersItems = await FirebaseManager.getOffersItems();
+  }
+
+  static Future<bool> sendMessage(String messageDetails) async {
+    return await FirebaseManager.sendMessage(messageDetails);
+  }
+
+  static Future<bool> submitLocation(
+      String locationName, int locationTime, double locationFees,
+      [String cLocationId = ""]) async {
+    return await FirebaseManager.submitLocation(
+            locationName, locationTime, locationFees, cLocationId)
+        .then((value) async {
+      await DataManager.iniUserAddresses();
+    });
+  }
+
+  static Future<bool> submitCategory(String categoryName,
+      [String cCategoryId = ""]) async {
+    return await FirebaseManager.submitCategory(categoryName, cCategoryId)
+        .then((value) async {
+      await DataManager.iniMainMenuCategories();
+      return true;
+    });
+  }
+
+  static Future<bool> submitMainMenuItem(
+      String categoryId, String itemName, String itemImageURL, int isActive,
+      [String mainMenuItemId = ""]) async {
+    return await FirebaseManager.submitMainMenuItem(
+            categoryId, itemName, itemImageURL, isActive, mainMenuItemId)
+        .then((value) async {
+      await DataManager.iniMainMenuItems();
+    });
+  }
+
+  static Future<bool> submitSubMenuItem(
+      String mainMenuItemId,
+      String name,
+      double price,
+      int discount,
+      String description,
+      String imageURL,
+      int isActive,
+      [String subMenuItemId = ""]) async {
+    return await FirebaseManager.submitSubMenuItem(mainMenuItemId, name, price,
+        discount, description, imageURL, isActive, subMenuItemId);
+  }
+
+  static Future<bool> deleteLocation(String locationId) async {
+    return await FirebaseManager.deleteLocation(locationId).then((value) async {
+      await DataManager.iniUserAddresses();
+    });
+  }
+
+  static Future<bool> deleteCategory(String categoryId) async {
+    return await FirebaseManager.deleteCategory(categoryId).then((value) async {
+      await DataManager.iniMainMenuCategories();
+    });
+  }
+
+  static Future<bool> deleteMainMenuItem(String mainMenuItemId) async {
+    return await FirebaseManager.deleteMainMenuItem(mainMenuItemId)
+        .then((value) async {
+      await DataManager.iniMainMenuItems();
+    });
+  }
+
+  static Future<bool> deleteSubMenuItem(String subMenuItemId) async {
+    return await FirebaseManager.deleteSubMenuItem(subMenuItemId);
+  }
+
+  static Future<dynamic> getAllMessages() async {
+    return await FirebaseManager.getAllMessages();
+  }
 }

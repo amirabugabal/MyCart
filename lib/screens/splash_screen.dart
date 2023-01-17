@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
-
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:mycart/screens/drawer_screen.dart';
+import 'package:mycart/screens/get_started.dart';
 import 'package:mycart/screens/sign_in.dart';
 import 'package:mycart/services/data_manager.dart';
+import 'package:flutter/material.dart';
+
+import 'dart:async';
+
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SplashScreen extends StatefulWidget {
   static const routeName = '/';
@@ -13,21 +17,36 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  
-  @override
-  void initState() {
-    iniApp();
-    super.initState();
+  Future<Function> iniApp() async {
+    await DataManager.mPrefManager.loadDataFromLocalMemory();
+    if (DataManager.mPrefManager.isLoggedIn()) {
+      await DataManager.iniUserAddresses();
+      await DataManager.iniMainMenuCategories();
+      await DataManager.iniMainMenuItems();
+    }
+    return Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          if (DataManager.mPrefManager.isLoggedIn()) {
+            print("Already Logged In");
+            return DrawerScreen();
+          } else {
+            if (DataManager.mPrefManager.isLangSet()) {
+              return SignInScreen();
+            } else {
+              return GetStartedScreen();
+            }
+          }
+        },
+      ),
+    );
   }
 
-  Future<void> iniApp () {
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if(DataManager.isLoggedIn){
-            Navigator.of(context).pushReplacementNamed(DrawerScreen.routeName);
-          }else{
-            Navigator.of(context).pushReplacementNamed(SignInScreen.routeName);
-          }
-    });
+  @override
+  void initState() {
+    super.initState();
+    iniApp();
   }
 
   @override
@@ -41,8 +60,8 @@ class _SplashScreenState extends State<SplashScreen> {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -76,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: SpinKitSquareCircle(
-                color: Color(0xFF89CFF0),
+                color: Color(0xFF00af87),
                 size: 20,
               ),
             ),

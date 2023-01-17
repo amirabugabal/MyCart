@@ -1,14 +1,19 @@
+import 'package:mycart/models/sub_menu/sub_menu_item.dart';
 import 'package:mycart/screens/my_cart.dart';
 import 'package:mycart/screens/order_placed.dart';
+import 'package:mycart/services/cart_manager.dart';
+import 'package:mycart/services/data_manager.dart';
 import 'package:mycart/widgets/item/mini_add_remove_card.dart';
+import 'package:mycart/widgets/item/mini_specs_card.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 class ItemScreen extends StatefulWidget {
   static const appBarTitle = 'Item';
   static const routeName = '/item';
-  List mItem;
+  SubMenuItemClass mItem;
 
-  ItemScreen(List mItem) {
+  ItemScreen(SubMenuItemClass mItem) {
     this.mItem = mItem;
   }
 
@@ -19,7 +24,7 @@ class ItemScreen extends StatefulWidget {
 }
 
 class ItemScreenState extends State<ItemScreen> {
-  int iniValue = 1;
+  int iniValue = 0;
 
   void addItem() {
     setState(() {
@@ -35,6 +40,10 @@ class ItemScreenState extends State<ItemScreen> {
     });
   }
 
+  void navigateTo() {
+    Navigator.pushNamed(context, OrderPlacedScreen.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,8 +55,8 @@ class ItemScreenState extends State<ItemScreen> {
             decoration: new BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Color(0xFF89CFF0),
-                  Color(0xFF0047AB),
+                  Color(0xFF00d466),
+                  Color(0xFF00af87),
                 ],
               ),
             ),
@@ -96,13 +105,40 @@ class ItemScreenState extends State<ItemScreen> {
                           padding: EdgeInsets.all(20),
                           child: FadeInImage(
                             image: NetworkImage(
-                              widget.mItem[3],
+                              widget.mItem.getImagePath(),
                             ),
                             placeholder: AssetImage(
                               "assets/images/holders/item_holder.png",
                             ),
                           ),
                         ),
+                        (widget.mItem.discount != 0)
+                            ? FractionallySizedBox(
+                                widthFactor: 0.3,
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFd86464),
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        bottomRight: Radius.circular(30)),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(15),
+                                    child: AutoSizeText(
+                                      widget.mItem.discount.toString() +
+                                          '% OFF',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : SizedBox(),
                       ],
                     ),
                   ),
@@ -113,7 +149,7 @@ class ItemScreenState extends State<ItemScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            widget.mItem[2],
+                            widget.mItem.name,
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 18,
@@ -126,12 +162,14 @@ class ItemScreenState extends State<ItemScreen> {
                             Row(
                               children: [
                                 Text(
-                                 widget.mItem[4]
+                                  (widget.mItem.discount != 0
+                                          ? widget.mItem.getFinalPrice()
+                                          : widget.mItem.price)
                                       .toString(),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF89CFF0),
+                                    color: Color(0xFF00af87),
                                   ),
                                 ),
                                 SizedBox(
@@ -142,14 +180,66 @@ class ItemScreenState extends State<ItemScreen> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF89CFF0),
+                                    color: Color(0xFF00af87),
                                   ),
                                 ),
                               ],
                             ),
+                            SizedBox(
+                              width: 12,
+                            ),
+                            (widget.mItem.discount != 0)
+                                ? Row(
+                                    children: [
+                                      Text(
+                                        widget.mItem.price.toString(),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 2,
+                                      ),
+                                      Text(
+                                        'EGP',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : SizedBox(
+                                    height: 12,
+                                  ),
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.mItem.description,
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [],
                     ),
                   ),
                   Row(
@@ -167,8 +257,8 @@ class ItemScreenState extends State<ItemScreen> {
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: <Color>[
-                                    Color(0xFF89CFF0),
-                                    Color(0xFF0047AB),
+                                    Color(0xFF00d466),
+                                    Color(0xFF00af87),
                                   ],
                                 ),
                                 borderRadius:
@@ -188,7 +278,12 @@ class ItemScreenState extends State<ItemScreen> {
                                 ),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              if (iniValue > 0) {
+                                CartManager.addItem(widget.mItem, iniValue);
+                              }
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ),
                       ),
