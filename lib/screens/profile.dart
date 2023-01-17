@@ -36,6 +36,7 @@ class ProfileScreenState extends State<ProfileScreen> {
               ProfileScreen.routeName,
             ); //Edit Profile Screen
           },
+          //edit profile
           child: Text(
             'Edit Profile',
             style: TextStyle(
