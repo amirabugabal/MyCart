@@ -34,7 +34,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       currAddress = newAddress;
     });
   }
-
+//promocode
   void applyPromoCode() {
     setState(() {
       if (isPromoApplied) {
