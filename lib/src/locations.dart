@@ -92,7 +92,4 @@ Future<Locations> getGoogleOffices() async {
         uri: Uri.parse(googleLocationsURL));
   }
 }
-//
-////
-//
-//
+
