@@ -31,7 +31,7 @@ class ItemScreenState extends State<ItemScreen> {
       iniValue++;
     });
   }
-
+//remove item
   void removeItem() {
     setState(() {
       if (iniValue > 0) {
