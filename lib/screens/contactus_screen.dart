@@ -140,13 +140,11 @@ class ContactUsScreenState extends State<ContactUsScreen> {
                             ),
                           ),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState.validate()) {
-                            var message = messageController.text;
-                            DataManager.sendMessage(message).then((response) {
-                              if (response) {
-                                Navigator.pop(context);
-                              } else {}
+                       
+                        
+                        
+                        
+                        
                             });
                           }
                         },
